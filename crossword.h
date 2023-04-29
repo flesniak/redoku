@@ -1,11 +1,17 @@
 #ifndef CROSSWORD_H
 #define CROSSWORD_H
 
+#include <array>
+
 #include <QObject>
 #include <QVector>
 #include <QHash>
 
-#include "cwc/grid.hh"
+// #include "cwc/grid.hh"
+
+namespace qqwing {
+    class SudokuBoard;
+};
 
 class Crossword : public QObject
 {
@@ -25,8 +31,8 @@ signals:
 
 public slots:
     QString hintAt(const int index);
-    QString correctAt(const int index);
-    bool isOpen(const int index);
+    QString numberAt(const int index);
+    bool isFixed(const int index);
 
     QStringList hintsAcross();
     QStringList hintsDown();
@@ -39,11 +45,12 @@ private:
 
     QHash<QString, QString> m_hints;
 
-    int m_rows = 0;
-    int m_columns = 0;
+    int m_rows = 9;
+    int m_columns = 9;
 
-    Grid *m_grid = nullptr;
-    Answers *m_answers = nullptr;
+    qqwing::SudokuBoard *m_grid = nullptr;
+    // int m_originalSolution[81];
+    std::array<int,81> m_initialHints;
 };
 
 #endif // CROSSWORD_H

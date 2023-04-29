@@ -68,7 +68,7 @@ protected:
 int main(int argc, char *argv[])
 {
     setlocale(LC_CTYPE, "");
-    Symbol::buildindex();
+    // Symbol::buildindex();
     qsrand(time(0));
 
 #ifdef REMARKABLE_DEVICE
@@ -93,22 +93,20 @@ int main(int argc, char *argv[])
     }
 #endif
 
-
 // hack around crappy stylus/tablet support in qt 5.6
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 7, 0))
     app.setAttribute(Qt::AA_SynthesizeMouseForUnhandledTabletEvents);
 #endif
 
-
     QQmlApplicationEngine engine;
     qmlRegisterType<DrawableCell>("com.iskrembilen", 1, 0, "DrawableCell");
     qmlRegisterType<TabletWindow>("com.iskrembilen", 1, 0, "TabletWindow");
     qmlRegisterSingletonType<Crossword>("com.iskrembilen", 1, 0, "Crossword", [](QQmlEngine *engine, QJSEngine*) -> QObject* {
-        Crossword *crossword = new Crossword;
+        Crossword *crossword = new Crossword();
         engine->setObjectOwnership(crossword, QQmlEngine::JavaScriptOwnership);
         return crossword;
     });
-//    engine.rootContext()->setProperty("Crossword", &crossword);
+    // engine.rootContext()->setProperty("Crossword", &crossword);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     if (engine.rootObjects().isEmpty()) {

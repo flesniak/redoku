@@ -7,12 +7,13 @@ TabletWindow {
     width: 1404
     height: 1872
 
-    title: "reCrossable"
+    // title: "reDoku"
+    title: "sudokable"
     flags: Qt.Dialog
 
-    Rectangle {
-        anchors.fill: parent
-    }
+    // Rectangle {
+    //     anchors.fill: parent
+    // }
     Text {
         id: currentHint
         anchors {
@@ -26,128 +27,199 @@ TabletWindow {
 
     Rectangle {
         anchors.fill: mainGrid
-        anchors.margins: -(border.width  + 2)
+        anchors.margins: -3
         color: "transparent"
         border.width: 5
-        border.color: "black"
     }
 
     Grid {
         id: mainGrid
         anchors {
-            right: parent.right
+            centerIn: parent
             margins: 20
-            bottom: parent.bottom
-            left: downHints.right
-            top: acrossHints.bottom
         }
 
-        spacing: 1
-        rows: Crossword.rows
-        columns: Crossword.columns
+        spacing: 0
+        rows: 3
+        columns: 3
 
-        property int cellSize: Math.max(Math.floor(Math.min(width / Crossword.columns, height / Crossword.rows)), 80);
+        // TEST
+        // width: parent.width
+        // height: parent.height
+
+        // property int cellSize: Math.max(Math.floor(Math.min(width / columns, height / rows)), 240);
+        property int cellSize: 240+2*2;
+        // property int cellSize: 80*3;
 
         Repeater {
-            model: Crossword.rows * Crossword.columns
+            id: groups
+            model: parent.rows * parent.columns
+            delegate: Rectangle {
+                // anchors.fill: parent
+                // anchors.margins: -(border.width + 2)
+                // anchors.margins: border.width - 2
+                // anchors {
+                //     top: cells.itemAt(index*3).top
+                //     left: cells.itemAt(index*3).left
+                //     right: item.right
+                //     bottom: item.bottom
+                // }
+                color: "transparent"
+                // color: "blue"
+                // width: parent.width
+                // height: parent.height
+                // property int index: index
+                width: parent.cellSize
+                height: parent.cellSize
+                border.width: 3
+                // border.color: "red"
+                Grid {
+                    id: cellGrid
+                    anchors {
+                    //     //right: parent.right
+                        centerIn: parent
+                        fill: parent
+                        margins: parent.border.width-1
+                    //     //bottom: parent.bottom
+                    //     //left: parent.left
+                    //     //top: parent.top
+                    //     //left: downHints.right
+                    //     //top: acrossHints.bottom
+                    }
 
-            delegate: DrawableCell {
-                width: mainGrid.cellSize
-//                width: 1404 - downHints.width
-                height: mainGrid.cellSize
-                onWidthChanged: console.log("cell widtH:" + width)
+                    spacing: 0
+                    // rows: Crossword.rows
+                    // columns: Crossword.columns
+                    rows: 3
+                    columns: 3
+                    // width: 80*3
+                    // height: 80*3
 
-                enabled: Crossword.isOpen(index) && !correctText.visible
+                    // property int cellSize: Math.max(Math.floor(Math.min(width / Crossword.columns, height / Crossword.rows)), 80);
+                    // property int cellSize: Math.max(Math.floor(Math.min(parent.width / columns, parent.height / rows)), 80);
+                    property int cellSize: 80;
+                    property int groupIndex: index
 
-                Rectangle {
-                    anchors.fill: parent
-                    border.width: 1
-                    color: parent.enabled ? "transparent" : "black"
-                }
+                    // Rectangle {
+                    //     // anchors.fill: parent
+                    //     // anchors.margins: -(border.width + 2)
+                    //     //anchors.margins: -3
+                    //     // anchors {
+                    //     //     top: cells.itemAt(index*3).top
+                    //     //     left: cells.itemAt(index*3).left
+                    //     //     right: item.right
+                    //     //     bottom: item.bottom
+                    //     // }
+                    //     color: "transparent"
+                    //     // color: "blue"
+                    //     // width: parent.width
+                    //     // height: parent.height
+                    //     width: parent.cellSize*3
+                    //     height: parent.cellSize*3
+                    //     border.width: 5
+                    //     border.color: "black"
+                    // }
 
-                Text {
-                    x: 5
-                    y: 5
-                    text: Crossword.hintAt(index)
-                    color: parent.enabled ? "gray" : "white"
-                    font.pixelSize: 20
-                    font.bold: true
-                }
+                    Repeater {
+                        id: cells
+                        model: parent.rows * parent.columns
+                        // delegate: puzzleCell { index }
+                        delegate: DrawableCell {
+                            width: parent.cellSize
+                            height: parent.cellSize
+                            //onWidthChanged: console.log("cell widtH:" + width)
+                            // property int globalIndex: 3*parent.parent.groupIndex+index
+                            property int globalIndex: Math.floor(index/3)*6 + parent.groupIndex*3 + index + Math.floor(parent.groupIndex/3)*18
 
-                Text {
-                    id: correctText
-                    anchors.centerIn: parent
-                    visible: parent.recognized === text
-                    text: Crossword.correctAt(index)
-                    color: "white"
+                            enabled: !Crossword.isFixed(globalIndex) //&& !correctText.visible
+
+                            Rectangle {
+                                anchors.fill: parent
+                                border.width: 1
+                                color: "transparent"
+                            }
+
+                            Text {
+                                id: numberCell
+                                anchors.centerIn: parent
+                                // anchors.fill: parent
+                                font.bold: Crossword.isFixed(globalIndex)
+                                visible: parent.recognized === text || Crossword.isFixed(globalIndex)
+                                text: Crossword.numberAt(globalIndex)
+                                // visible: true
+                                // text: globalIndex
+                                minimumPointSize: 10
+                                font.pointSize: 32
+                                fontSizeMode: Text.Fit
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 
-    Rectangle {
-        anchors.fill: downHints
-        anchors.margins: -(border.width  + 2)
-        color: "transparent"
-        border.width: 5
-        border.color: "black"
-    }
+    // Rectangle {
+    //     anchors.fill: downHints
+    //     anchors.margins: -(border.width  + 2)
+    //     color: "transparent"
+    //     border.width: 5
+    //     border.color: "black"
+    // }
 
-    Column {
-        id: downHints
-        anchors {
-            top: acrossHints.bottom
-            topMargin: 20
-            left: parent.left
-            leftMargin: 10
-        }
+    // Column {
+    //     id: downHints
+    //     anchors {
+    //         top: acrossHints.bottom
+    //         topMargin: 20
+    //         left: parent.left
+    //         leftMargin: 10
+    //     }
 
-        Text {
-            text: "Down"
-            font.bold: true
-        }
+    //     Text {
+    //         text: "Down"
+    //         font.bold: true
+    //     }
 
-        Repeater {
-            model: Crossword.hintsDown()
-            delegate: Text {
-                text: modelData
-                font.pixelSize: 20
-                width: 200
-                wrapMode: Text.WordWrap
-            }
-        }
-    }
+    //     Repeater {
+    //         model: Crossword.hintsDown()
+    //         delegate: Text {
+    //             text: modelData
+    //             font.pixelSize: 20
+    //             width: 200
+    //             wrapMode: Text.WordWrap
+    //         }
+    //     }
+    // }
 
+    // Rectangle {
+    //     anchors.fill: acrossHints
+    //     anchors.margins: -(border.width  + 2)
+    //     color: "transparent"
+    //     border.width: 5
+    //     border.color: "black"
+    // }
 
+    // Grid {
+    //     id: acrossHints
+    //     anchors {
+    //         right: parent.right
+    //         left: parent.left
+    //         top: parent.top
+    //         margins: 10
+    //     }
 
-    Rectangle {
-        anchors.fill: acrossHints
-        anchors.margins: -(border.width  + 2)
-        color: "transparent"
-        border.width: 5
-        border.color: "black"
-    }
+    //     Text {
+    //         text: "Across"
+    //         font.bold: true
+    //     }
 
-    Grid {
-        id: acrossHints
-        anchors {
-            right: parent.right
-            left: parent.left
-            top: parent.top
-            margins: 10
-        }
-
-        Text {
-            text: "Across"
-            font.bold: true
-        }
-
-        Repeater {
-            model: Crossword.hintsAcross()
-            delegate: Text {
-                text: modelData
-                font.pixelSize: 20
-            }
-        }
-    }
+    //     Repeater {
+    //         model: Crossword.hintsAcross()
+    //         delegate: Text {
+    //             text: modelData
+    //             font.pixelSize: 20
+    //         }
+    //     }
+    // }
 }

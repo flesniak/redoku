@@ -1,5 +1,6 @@
 QT += quick
 CONFIG += c++11
+CONFIG += config
 
 #CONFIG += sanitizer sanitize_address
 
@@ -17,15 +18,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     main.cpp \
     crossword.cpp \
-    cwc/cwc.cc \
-    cwc/dict.cc \
-    cwc/grid.cc \
-    cwc/letterdict.cc \
-    cwc/symbol.cc \
-    cwc/timer.cc \
-    cwc/wordlist.cc \
     drawablecell.cpp \
-    characterrecognizer.cpp
+    characterrecognizer.cpp \
+    qqwing/src/cpp/qqwing.cpp
 
 LIBS += -ldlib
 RESOURCES += qml.qrc \
@@ -46,16 +41,12 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     crossword.h \
-    cwc/cwc.hh \
-    cwc/dict.hh \
-    cwc/grid.hh \
-    cwc/letterdict.hh \
-    cwc/main.hh \
-    cwc/symbol.hh \
-    cwc/timer.hh \
-    cwc/wordlist.hh \
+    qqwing/target/automake/config.h \
     drawablecell.h \
     characterrecognizer.h
+
+INCLUDEPATH += \
+    qqwing/target/automake
 
 linux-oe-g++ {
     LIBS += -lqsgepaper
