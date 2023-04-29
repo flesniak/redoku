@@ -37,7 +37,7 @@ template <typename SUBNET> using incept_b = inception3<block_b1,block_b2,block_b
 // Now we can define a simple network for classifying MNIST digits.  We will
 // train and test this network in the code below.
 using net_type = loss_multiclass_log<
-        fc<26,
+        fc<10,
         relu<fc<32,
         max_pool<2,2,2,2,incept_b<
         max_pool<2,2,2,2,incept_a<
