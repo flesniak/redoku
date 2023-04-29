@@ -1,0 +1,3 @@
+[submodule "qqwing"]
+	path = qqwing
+	url = git@github.com:stephenostermiller/qqwing.git
