@@ -9,7 +9,7 @@
     The specific network we will run is from the paper
         LeCun, Yann, et al. "Gradient-based learning applied to document recognition."
         Proceedings of the IEEE 86.11 (1998): 2278-2324.
-    except that we replace the sigmoid non-linearities with rectified linear units. 
+    except that we replace the sigmoid non-linearities with rectified linear units.
 
     These tools will use CUDA and cuDNN to drastically accelerate network
     training and testing.  CMake should automatically find them if they are
@@ -29,25 +29,25 @@ using namespace dlib;
 
 #if 0
 template <
-    int N, 
-    template <typename> class BN, 
-    int stride, 
+    int N,
+    template <typename> class BN,
+    int stride,
     typename SUBNET
-    > 
+    >
 using block  = BN<con<N,3,3,1,1,relu<BN<con<N,3,3,stride,stride,SUBNET>>>>>;
 
 template <
-    template <int,template<typename>class,int,typename> class block, 
-    int N, 
-    template<typename>class BN, 
+    template <int,template<typename>class,int,typename> class block,
+    int N,
+    template<typename>class BN,
     typename SUBNET
     >
 using residual = add_prev1<block<N,BN,1,tag1<SUBNET>>>;
 
 template <
-    template <int,template<typename>class,int,typename> class block, 
-    int N, 
-    template<typename>class BN, 
+    template <int,template<typename>class,int,typename> class block,
+    int N,
+    template<typename>class BN,
     typename SUBNET
     >
 using residual_down = add_prev2<avg_pool<2,2,2,2,skip1<tag2<block<N,BN,2,tag1<SUBNET>>>>>>;
@@ -79,7 +79,7 @@ template <typename SUBNET> using block_a4 = relu<con<10,1,1,1,1,max_pool<3,3,1,1
 
 // Here is inception layer definition. It uses different blocks to process input
 // and returns combined output.  Dlib includes a number of these inceptionN
-// layer types which are themselves created using concat layers.  
+// layer types which are themselves created using concat layers.
 template <typename SUBNET> using incept_a = inception4<block_a1,block_a2,block_a3,block_a4, SUBNET>;
 
 // Network can have inception layers of different structure.  It will work
@@ -103,7 +103,7 @@ using net_type = loss_multiclass_log<
 
 int main(int argc, char** argv) try
 {
-    // This example is going to run on the MNIST dataset.  
+    // This example is going to run on the MNIST dataset.
     if (argc != 2)
     {
         cout << "This example needs the MNIST dataset to run!" << endl;
@@ -122,61 +122,61 @@ int main(int argc, char** argv) try
     std::vector<matrix<unsigned char>> testing_images;
     std::vector<unsigned long>         testing_labels;
 
-    std::ifstream data(argv[1]);
-    std::string line;
-    while(std::getline(data,line)) {
-        std::stringstream lineStream(line);
-        std::string cell;
+    // std::ifstream data(argv[1]);
+    // std::string line;
+    // while(std::getline(data,line)) {
+    //     std::stringstream lineStream(line);
+    //     std::string cell;
 
 
-        if (!std::getline(lineStream, cell, ',')) {
-            cerr << "failed to get first cell" << endl;
-            return 1;
-        }
+    //     if (!std::getline(lineStream, cell, ',')) {
+    //         cerr << "failed to get first cell" << endl;
+    //         return 1;
+    //     }
 
-        int letter = stoi(cell);
-        if (letter > 25) {
-            cerr << "invalid letter " << letter << endl;
-            return 1;
-        }
+    //     int letter = stoi(cell);
+    //     if (letter > 25) {
+    //         cerr << "invalid letter " << letter << endl;
+    //         return 1;
+    //     }
 
-        matrix<unsigned char, 28, 28> picture;
-        int col = 0;
-        int row = 0;
-        while(std::getline(lineStream, cell, ',')) {
-            if (row > 27) {
-                cerr << "invalid row " << training_images.size() << endl;
-                return 1;
-            }
-            picture(col, row) = stoi(cell);
-            col++;
-            if (col > 27) {
-                col = 0;
-                row++;
-            }
-        }
-        training_images.push_back(picture);
-        training_labels.push_back(letter);
-    }
-    std::cout << training_images.size() << std::endl;
+    //     matrix<unsigned char, 28, 28> picture;
+    //     int col = 0;
+    //     int row = 0;
+    //     while(std::getline(lineStream, cell, ',')) {
+    //         if (row > 27) {
+    //             cerr << "invalid row " << training_images.size() << endl;
+    //             return 1;
+    //         }
+    //         picture(col, row) = stoi(cell);
+    //         col++;
+    //         if (col > 27) {
+    //             col = 0;
+    //             row++;
+    //         }
+    //     }
+    //     training_images.push_back(picture);
+    //     training_labels.push_back(letter);
+    // }
+    // std::cout << training_images.size() << std::endl;
 
-    randomize_samples(training_images, training_labels);
-    for (size_t i=0; i<training_images.size() / 3; i++) {
-        testing_images.push_back(training_images[training_images.size() - i - 1]);
-        testing_labels.push_back(training_labels[training_images.size() - i - 1]);
-    }
-    training_images.resize(training_images.size() - testing_images.size());
-    training_labels.resize(training_labels.size() - testing_labels.size());
+    // randomize_samples(training_images, training_labels);
+    // for (size_t i=0; i<training_images.size() / 3; i++) {
+    //     testing_images.push_back(training_images[training_images.size() - i - 1]);
+    //     testing_labels.push_back(training_labels[training_images.size() - i - 1]);
+    // }
+    // training_images.resize(training_images.size() - testing_images.size());
+    // training_labels.resize(training_labels.size() - testing_labels.size());
 
 
 
-    //load_mnist_dataset(argv[1], training_images, training_labels, testing_images, testing_labels);
+    load_mnist_dataset(argv[1], training_images, training_labels, testing_images, testing_labels);
 
 
     // Now let's define the LeNet.  Broadly speaking, there are 3 parts to a network
     // definition.  The loss layer, a bunch of computational layers, and then an input
-    // layer.  You can see these components in the network definition below.  
-    // 
+    // layer.  You can see these components in the network definition below.
+    //
     // The input layer here says the network expects to be given matrix<unsigned char>
     // objects as input.  In general, you can use any dlib image or matrix type here, or
     // even define your own types by creating custom input layers.
@@ -184,15 +184,15 @@ int main(int argc, char** argv) try
     // Then the middle layers define the computation the network will do to transform the
     // input into whatever we want.  Here we run the image through multiple convolutions,
     // ReLU units, max pooling operations, and then finally a fully connected layer that
-    // converts the whole thing into just 10 numbers.  
-    // 
+    // converts the whole thing into just 10 numbers.
+    //
     // Finally, the loss layer defines the relationship between the network outputs, our 10
     // numbers, and the labels in our dataset.  Since we selected loss_multiclass_log it
     // means we want to do multiclass classification with our network.   Moreover, the
     // number of network outputs (i.e. 10) is the number of possible labels.  Whichever
     // network output is largest is the predicted label.  So for example, if the first
     // network output is largest then the predicted digit is 0, if the last network output
-    // is largest then the predicted digit is 9.  
+    // is largest then the predicted digit is 9.
 #if 0
     using net_type = loss_multiclass_log<
                                 fc<26,
@@ -204,7 +204,7 @@ int main(int argc, char** argv) try
                                 //relu<fc<784,
                                 max_pool<2,2,2,2,relu<con<16,5,5,1,1,
                                 max_pool<2,2,2,2,relu<con<6,5,5,1,1,
-                                input<matrix<unsigned char>> 
+                                input<matrix<unsigned char>>
                                 >>>>>>>>>>
                                 //>>
                                 //>>
@@ -217,7 +217,7 @@ int main(int argc, char** argv) try
     // fully connected layer with 84 outputs, then apply ReLU.  Similarly, a block of
     // max_pool<2,2,2,2,relu<con<16,5,5,1,1,SUBNET>>> means we apply 16 convolutions with a
     // 5x5 filter size and 1x1 stride to the output of a subnetwork, then apply ReLU, then
-    // perform max pooling with a 2x2 window and 2x2 stride.  
+    // perform max pooling with a 2x2 window and 2x2 stride.
 
 
 
@@ -242,7 +242,7 @@ int main(int argc, char** argv) try
     // learning rate until the loss stops decreasing.  Then it reduces the learning rate by
     // a factor of 10 and continues running until the loss stops decreasing again.  It will
     // keep doing this until the learning rate has dropped below the min learning rate
-    // defined above or the maximum number of epochs as been executed (defaulted to 10000). 
+    // defined above or the maximum number of epochs as been executed (defaulted to 10000).
     trainer.train(training_images, training_labels);
 
     // At this point our net object should have learned how to classify MNIST images.  But
@@ -271,7 +271,7 @@ int main(int argc, char** argv) try
             ++num_right;
         else
             ++num_wrong;
-        
+
     }
     cout << "training num_right: " << num_right << endl;
     cout << "training num_wrong: " << num_wrong << endl;
@@ -288,7 +288,7 @@ int main(int argc, char** argv) try
             ++num_right;
         else
             ++num_wrong;
-        
+
     }
     cout << "testing num_right: " << num_right << endl;
     cout << "testing num_wrong: " << num_wrong << endl;
