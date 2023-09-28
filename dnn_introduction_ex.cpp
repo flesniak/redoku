@@ -27,48 +27,45 @@
 using namespace std;
 using namespace dlib;
 
-#if 0
-template <
-    int N,
-    template <typename> class BN,
-    int stride,
-    typename SUBNET
-    >
-using block  = BN<con<N,3,3,1,1,relu<BN<con<N,3,3,stride,stride,SUBNET>>>>>;
+// #define INCEPTION
 
-template <
-    template <int,template<typename>class,int,typename> class block,
-    int N,
-    template<typename>class BN,
-    typename SUBNET
-    >
-using residual = add_prev1<block<N,BN,1,tag1<SUBNET>>>;
+#ifndef INCEPTION
+    // Now let's define the LeNet.  Broadly speaking, there are 3 parts to a network
+    // definition.  The loss layer, a bunch of computational layers, and then an input
+    // layer.  You can see these components in the network definition below.
+    //
+    // The input layer here says the network expects to be given matrix<unsigned char>
+    // objects as input.  In general, you can use any dlib image or matrix type here, or
+    // even define your own types by creating custom input layers.
+    //
+    // Then the middle layers define the computation the network will do to transform the
+    // input into whatever we want.  Here we run the image through multiple convolutions,
+    // ReLU units, max pooling operations, and then finally a fully connected layer that
+    // converts the whole thing into just 10 numbers.
+    //
+    // Finally, the loss layer defines the relationship between the network outputs, our 10
+    // numbers, and the labels in our dataset.  Since we selected loss_multiclass_log it
+    // means we want to do multiclass classification with our network.   Moreover, the
+    // number of network outputs (i.e. 10) is the number of possible labels.  Whichever
+    // network output is largest is the predicted label.  So for example, if the first
+    // network output is largest then the predicted digit is 0, if the last network output
+    // is largest then the predicted digit is 9.
+    using net_type = loss_multiclass_log<
+                                fc<10,
+                                relu<fc<84,
+                                relu<fc<120,
+                                max_pool<2,2,2,2,relu<con<16,5,5,1,1,
+                                max_pool<2,2,2,2,relu<con<6,5,5,1,1,
+                                input<matrix<unsigned char>>
+                                >>>>>>>>>>>>;
+    // This net_type defines the entire network architecture.  For example, the block
+    // relu<fc<84,SUBNET>> means we take the output from the subnetwork, pass it through a
+    // fully connected layer with 84 outputs, then apply ReLU.  Similarly, a block of
+    // max_pool<2,2,2,2,relu<con<16,5,5,1,1,SUBNET>>> means we apply 16 convolutions with a
+    // 5x5 filter size and 1x1 stride to the output of a subnetwork, then apply ReLU, then
+    // perform max pooling with a 2x2 window and 2x2 stride.
+#else
 
-template <
-    template <int,template<typename>class,int,typename> class block,
-    int N,
-    template<typename>class BN,
-    typename SUBNET
-    >
-using residual_down = add_prev2<avg_pool<2,2,2,2,skip1<tag2<block<N,BN,2,tag1<SUBNET>>>>>>;
-
-template <typename SUBNET> using res       = relu<residual<block,8,bn_con,SUBNET>>;
-template <typename SUBNET> using ares      = relu<residual<block,8,affine,SUBNET>>;
-template <typename SUBNET> using res_down  = relu<residual_down<block,8,bn_con,SUBNET>>;
-template <typename SUBNET> using ares_down = relu<residual_down<block,8,affine,SUBNET>>;
-
-const unsigned long number_of_classes = 26;
-using net_type = loss_multiclass_log<fc<number_of_classes,
-                            avg_pool_everything<
-                            res<res<res<res_down<
-                            repeat<9,res, // repeat this layer 9 times
-                            res_down<
-                            res<
-                            input<matrix<unsigned char>>
-                            >>>>>>>>>>;
-#endif
-
-#if 1
 // Inception layer has some different convolutions inside.  Here we define
 // blocks as convolutions with different kernel size that we will use in
 // inception layer block.
