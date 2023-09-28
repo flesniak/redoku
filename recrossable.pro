@@ -1,5 +1,5 @@
 QT += quick
-CONFIG += c++11
+CONFIG += c++14
 CONFIG += config
 
 #CONFIG += sanitizer sanitize_address
