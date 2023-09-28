@@ -23,6 +23,7 @@
 #include <sstream>
 #include <fstream>
 #include <dlib/data_io.h>
+#include <dlib/cuda/cuda_dlib.h>
 
 using namespace std;
 using namespace dlib;
@@ -100,6 +101,18 @@ using net_type = loss_multiclass_log<
 
 int main(int argc, char** argv) try
 {
+    int n = cuda::get_num_devices();
+    cout << n << " cuda devices" << endl;
+    for (int i=0; i<n; i++) {
+        cout << "device " << i << ": " << cuda::get_device_name(i) << endl;
+    }
+    char* cuda_dev = secure_getenv("CUDA_DEVICE");
+    int cuda_dev_idx = 0;
+    if (cuda_dev != nullptr)
+        cuda_dev_idx = atoi(cuda_dev);
+    cuda::set_device(cuda_dev_idx);
+    cout << "using cuda device " << cuda_dev_idx << ": " << cuda::get_device_name(cuda_dev_idx) << endl;
+
     // This example is going to run on the MNIST dataset.
     if (argc != 2)
     {
