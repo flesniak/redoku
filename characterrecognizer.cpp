@@ -119,7 +119,7 @@ QString CharacterRecognizer::recognize(const QImage &image)
 
     const unsigned long pred = m_net->net(dlibImage);
 
-    return QString(QChar(ushort('A' + pred)));
+    return QString(QChar(ushort('0' + pred)));
 }
 
 CharacterRecognizer::CharacterRecognizer(QObject *parent) : QObject(parent)
